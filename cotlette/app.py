@@ -60,28 +60,8 @@ class Cotlette(Starlette):
     
     async def swagger_ui(self, request):
         """Swagger UI"""
-        swagger_template = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Swagger UI</title>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.css">
-        </head>
-        <body>
-            <div id="swagger-ui"></div>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.js"></script>
-            <script>
-                const ui = SwaggerUIBundle({
-                    url: '/openapi.json',
-                    dom_id: '#swagger-ui',
-                });
-            </script>
-        </body>
-        </html>
-        """
-        return HTMLResponse(swagger_template)
+        return await self.render_template(request, "swagger.html", context={})
     
-
     async def openapi_json(self, request):
         """Возвращает OpenAPI-спецификацию"""
         return JSONResponse(self.spec.to_dict())
@@ -114,19 +94,14 @@ class Cotlette(Starlette):
         return decorator
     
     async def admin_index(self, request):
-        """Обработчик для /admin"""
         return await self.render_template(request, "admin/index.html", context={})
     
     async def admin_signin(self, request):
-        """Обработчик для /admin"""
         return await self.render_template(request, "admin/signin.html", context={})
 
     async def render_template(self, request, template_name, context):
         context["request"] = request
         return self.templates.TemplateResponse(template_name, context)
-
-    async def json(self, data, status_code=200):
-        return JSONResponse(content=data, status_code=status_code)
     
     async def __call__(self, scope, receive, send):
         """Основной метод обработки запросов"""

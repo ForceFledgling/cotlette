@@ -1,10 +1,9 @@
-# app/main.py
 import sys
 sys.path.append("/Users/vladimir/Desktop/Личное/cotlette")
 import uvicorn
 
 from cotlette.app import Cotlette
-from cotlette.responses import JSONResponse, HTMLResponse
+from cotlette.core.responses import JSONResponse, HTMLResponse
 
 
 app = Cotlette()
