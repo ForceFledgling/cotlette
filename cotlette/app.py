@@ -52,7 +52,9 @@ class Cotlette(Starlette):
     
     def _initialize_internal_routes(self):
         """Инициализация внутренних маршрутов фреймворка"""
-        self.router.routes.append(Route("/admin", self.admin_home, methods=["GET"]))
+        # TODO Переделать
+        self.router.routes.append(Route("/admin", self.admin_index, methods=["GET"]))
+        self.router.routes.append(Route("/signin", self.admin_signin, methods=["GET"]))
         self.router.routes.append(Route("/docs", self.swagger_ui, methods=["GET"]))
         self.router.routes.append(Route("/openapi.json", self.openapi_json, methods=["GET"]))
     
@@ -111,9 +113,13 @@ class Cotlette(Starlette):
             return decorator(endpoint)
         return decorator
     
-    async def admin_home(self, request):
+    async def admin_index(self, request):
         """Обработчик для /admin"""
         return await self.render_template(request, "admin/index.html", context={})
+    
+    async def admin_signin(self, request):
+        """Обработчик для /admin"""
+        return await self.render_template(request, "admin/signin.html", context={})
 
     async def render_template(self, request, template_name, context):
         context["request"] = request
