@@ -1,6 +1,7 @@
 # cotlette/crud.py
 from sqlalchemy.orm import Session
 
+
 class CRUDBase:
     def __init__(self, model):
         self.model = model

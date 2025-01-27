@@ -1,17 +1,44 @@
-# cotlette/app.py
+import os
+
+from apispec import APISpec
+from apispec.ext.marshmallow import MarshmallowPlugin
+
 from starlette.applications import Starlette
 from starlette.templating import Jinja2Templates
 from starlette.responses import JSONResponse, HTMLResponse
 from starlette.routing import Route
 
-from apispec import APISpec
-from apispec.ext.marshmallow import MarshmallowPlugin
+from jinja2 import FileSystemLoader, Environment
 
 
 class Cotlette(Starlette):
     def __init__(self, templates_dir="templates", *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.templates = Jinja2Templates(directory=templates_dir)
+
+        # Текущая директория фреймворка
+        framework_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Путь к директории шаблонов внутри фреймворка
+        framework_templates_dir = os.path.join(framework_dir, "templates")
+
+        # Подключам шаблоны
+        # self.templates = Jinja2Templates(directory=templates_dir)
+        self.templates = Jinja2Templates(directory=framework_templates_dir)
+
+        # Дополнительные директории для шаблонов (например, пользовательские)
+        custom_templates_dir = os.path.abspath("templates")
+        override_templates_dir = os.path.abspath("override/templates")
+
+       # Создаем Jinja2 Environment с загрузчиком для нескольких директорий
+        self.jinja_env = Environment(loader=FileSystemLoader([
+            override_templates_dir,
+            framework_templates_dir,
+            custom_templates_dir
+        ]))
+
+        # Передаем настроенное окружение Jinja2 в Starlette Templates
+        self.templates = Jinja2Templates(env=self.jinja_env)
+        
         self._initialize_internal_routes()
         self.spec = APISpec(
             title="Cotlette API",
@@ -83,7 +110,8 @@ class Cotlette(Starlette):
     
     async def admin_home(self, request):
         """Обработчик для /admin"""
-        return HTMLResponse("<h1>Admin Dashboard</h1>")
+        # return HTMLResponse("<h1>Admin Dashboard</h1>")
+        return await self.render_template(request, "dashboard.html", context={})
 
     async def render_template(self, request, template_name, context):
         context["request"] = request
