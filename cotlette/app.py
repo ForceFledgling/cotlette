@@ -7,6 +7,7 @@ from starlette.applications import Starlette
 from starlette.templating import Jinja2Templates
 from starlette.responses import JSONResponse, HTMLResponse
 from starlette.routing import Route
+from starlette.staticfiles import StaticFiles
 
 from jinja2 import FileSystemLoader, Environment
 
@@ -21,10 +22,6 @@ class Cotlette(Starlette):
         # Путь к директории шаблонов внутри фреймворка
         framework_templates_dir = os.path.join(framework_dir, "templates")
 
-        # Подключам шаблоны
-        # self.templates = Jinja2Templates(directory=templates_dir)
-        self.templates = Jinja2Templates(directory=framework_templates_dir)
-
         # Дополнительные директории для шаблонов (например, пользовательские)
         custom_templates_dir = os.path.abspath("templates")
         override_templates_dir = os.path.abspath("override/templates")
@@ -38,6 +35,12 @@ class Cotlette(Starlette):
 
         # Передаем настроенное окружение Jinja2 в Starlette Templates
         self.templates = Jinja2Templates(env=self.jinja_env)
+
+        # Путь к директории статических файлов
+        static_dir = os.path.join(framework_dir, "static")
+
+        # Подключаем статические файлы
+        self.mount("/static", StaticFiles(directory=static_dir), name="static")
         
         self._initialize_internal_routes()
         self.spec = APISpec(
@@ -110,8 +113,7 @@ class Cotlette(Starlette):
     
     async def admin_home(self, request):
         """Обработчик для /admin"""
-        # return HTMLResponse("<h1>Admin Dashboard</h1>")
-        return await self.render_template(request, "dashboard.html", context={})
+        return await self.render_template(request, "admin/index.html", context={})
 
     async def render_template(self, request, template_name, context):
         context["request"] = request
